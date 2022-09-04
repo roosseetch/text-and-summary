@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "project-text-and-summary"
+version = "0.1.0"
+description = "Store Texts, generate summary"
+authors = ["Rustem <ss.rustem@gmail.com>"]
+readme = "README.md"
+packages = [{ include = "app" }]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.81.0"
+pydantic = "^1.10.1"
+SQLAlchemy = "^1.4.40"
+uvicorn = "^0.18.3"
+alembic = "^1.8.1"
+tenacity = "^8.0.1"
+python-multipart = "^0.0.5"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
