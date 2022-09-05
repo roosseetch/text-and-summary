@@ -1,8 +1,8 @@
-from typing import Sequence
+from typing import Sequence, Optional
 
 from pydantic import BaseModel
 
-from ..utils.pydantic_models_decorators import as_form
+from ..utils.decorators import as_form
 
 @as_form
 class DocumentCreate(BaseModel):

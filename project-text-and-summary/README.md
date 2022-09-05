@@ -7,3 +7,4 @@ the bash script if preferred `poetry run ./prestart.sh`)
 4. [UNIX]: Run the FastAPI server via poetry with the bash script: `poetry run ./run.sh`
 5. [WINDOWS]: Run the FastAPI server via poetry with the Python command: `poetry run python app/main.py`
 6. Open http://localhost:8001/
+7. Open API documentation http://localhost:8001/docs or http://localhost:8001/redoc
