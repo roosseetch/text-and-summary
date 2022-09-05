@@ -1,13 +1,15 @@
 from pathlib import Path
 from typing import Optional, Any
 
-from fastapi import FastAPI, APIRouter, HTTPException, Form, Depends
+from fastapi import FastAPI, APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 
 from .schemas.document import (
     DocumentsListResponse, DocumentResponse, DocumentFullResponse,  DocumentCreate,
     DocumentSummaryResponse)
 from . import deps, crud
+from .utils.query_utils import get_db_obj_or_404
+from .utils.summarizer import text_summarizer_lsa
 
 
 # Project Directories
@@ -27,15 +29,8 @@ def retrieve_document_summary(
     """
     Retrieve a single document summary by ID
     """
-    result = crud.document.get(db=db, id=document_id)
-    if not result:
-        # the exception is raised, not returned - you will get a validation
-        # error otherwise.
-        raise HTTPException(
-            status_code=404, detail=f"Document summary with ID {document_id} not found"
-        )
-
-    return result
+    error_msg = f"Document summary with ID {document_id} not found."
+    return get_db_obj_or_404(obj_id=document_id, db=db, error_msg=error_msg)
 
 
 @api_router.get("/{document_id}", status_code=200, response_model=DocumentFullResponse)
@@ -47,13 +42,8 @@ def retrieve_document(
     """
     Retrieve a single document by ID
     """
-    result = crud.document.get(db=db, id=document_id)
-    if not result:
-        raise HTTPException(
-            status_code=404, detail=f"Document with ID {document_id} not found"
-        )
-
-    return result
+    error_msg = f"Document with ID {document_id} not found."
+    return get_db_obj_or_404(obj_id=document_id, db=db, error_msg=error_msg)
 
 
 @api_router.get("/", status_code=200, response_model=DocumentsListResponse)
@@ -79,7 +69,8 @@ def create_document(
     """
     Create a new document in the database.
     """
-    document = crud.document.create(db=db, obj_in=document_in)
+    summary = text_summarizer_lsa(document_in.text)
+    document = crud.document.create(db=db, obj_in={'text': document_in.text, 'summary': summary })
 
     return document
 
@@ -94,11 +85,8 @@ def update_document(
     """
     Update a document in the database.
     """
-    db_obj = crud.document.get(db=db, id=document_id)
-    if not db_obj:
-        raise HTTPException(
-            status_code=404, detail=f"Document with ID {document_id} can't be updated, not found"
-        )
+    error_msg = f"Document with ID {document_id} can't be updated, not found."
+    db_obj = get_db_obj_or_404(obj_id=document_id, db=db, error_msg=error_msg)
     document = crud.document.update(db=db, db_obj=db_obj, obj_in=document_in)
 
     return document
