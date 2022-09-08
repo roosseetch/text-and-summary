@@ -3,7 +3,7 @@ from typing import  Any
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from .. import crud
+from app import crud
 
 def get_db_obj_or_404(
     *,

@@ -1,11 +1,10 @@
 from typing import Generator
 
-from app.db.session import SessionLocal
+from app.db import session
 
 
 def get_db() -> Generator:
-    db = SessionLocal()
-    db.current_user_id = None
+    db = session.SessionLocal()
     try:
         yield db
     finally:
