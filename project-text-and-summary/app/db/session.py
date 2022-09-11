@@ -5,7 +5,7 @@ from app.core.config import settings
 
 
 engine = create_engine(
-    settings.SQLALCHEMY_DATABASE_URI,
+    settings.db.SQLALCHEMY_DATABASE_URI,
     # required for sqlite
     connect_args={"check_same_thread": False},
 )
