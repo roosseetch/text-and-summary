@@ -4,6 +4,47 @@ from app.models.document import Document
 from app.tests.factories import DocumentFactory
 
 
+def test_cors_middlewares_valid_origin(client):
+    """
+    test CORS middleware with valid Origin
+    """
+    headers = {
+        'Access-Control-Request-Method': 'GET',
+        'Access-Control-Request-Headers': 'origin',
+        'Origin': 'http://localhost:3000'
+    }
+    response = client.options('/', headers=headers)
+    assert response.status_code == 200
+    assert response.text == 'OK'
+    assert response.headers['access-control-allow-origin'] == 'http://localhost:3000'
+
+
+def test_cors_middlewares_not_valid_origin(client):
+    """
+    test CORS middleware with NOT valid Origin
+    """
+    headers = {
+        'Access-Control-Request-Method': 'GET',
+        'Access-Control-Request-Headers': 'origin',
+        'Origin': 'http://fake-url.fake'
+    }
+    response = client.options('/', headers=headers)
+    assert response.status_code == 400
+    assert response.text == 'Disallowed CORS origin'
+    assert 'access-control-allow-origin' not in response.headers
+
+
+def test_process_time_middleware(client):
+    """
+    test ProcessTimeMiddleware
+    """
+    response = client.get('/')
+    res = response.json()
+    assert response.status_code == 200
+    assert len(res['results']) == 0
+    assert 'x-process-time' in response.headers
+
+
 def test_retrieve_summary(client):
     """
     test retriving of summary

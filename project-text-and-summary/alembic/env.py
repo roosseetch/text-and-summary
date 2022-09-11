@@ -6,7 +6,7 @@ from sqlalchemy import pool
 from alembic import context
 
 from app.db.base import Base  # noqa
-from app.db.session import SQLALCHEMY_DATABASE_URI
+from app.core.config import settings
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -33,7 +33,7 @@ target_metadata = Base.metadata
 
 
 def get_url():
-    return SQLALCHEMY_DATABASE_URI
+    return settings.db.SQLALCHEMY_DATABASE_URI
 
 
 def run_migrations_offline() -> None:
