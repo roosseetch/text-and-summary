@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+    nginx-document:
+      image: nginx:latest
+      container_name: nginx-document
+      links:
+        - web
+      depends_on:
+        - web
+      ports:
+        - "80:80"
+        - "443:443"
+      volumes:
+        - ../../nginx/ssl:/etc/nginx/ssl:ro
+        - ../../nginx/conf.d:/etc/nginx/conf.d:ro
