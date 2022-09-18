@@ -6,3 +6,6 @@ __pycache__/
 
 # sqlite db
 test.db
+
+# PostgreSQL DB data
+_docker/db-data/

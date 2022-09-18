@@ -1,0 +1,20 @@
+version: "3"
+services:
+  web:
+    build:
+      context: ../../
+      dockerfile: Dockerfile.python
+    container_name: web
+    links:
+      - pg-db
+    depends_on:
+      - pg-db
+    # ports:
+    #   - "8001:8001"
+    volumes:
+      - ../../project-text-and-summary/app:/app/app
+      - ../../project-text-and-summary/start_db_session.py:/app/start_db_session.py
+      - ../../project-text-and-summary/run.sh:/app/run.sh
+      - ../../project-text-and-summary/prestart.sh:/app/prestart.sh
+      - ../../project-text-and-summary/alembic:/app/alembic
+      - ../../project-text-and-summary/alembic.ini:/app/alembic.ini

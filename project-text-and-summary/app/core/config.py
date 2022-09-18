@@ -1,24 +1,25 @@
+import os
 import pathlib
 
-from pydantic import AnyHttpUrl, BaseSettings, EmailStr, validator
+from dotenv import load_dotenv
+from pydantic import AnyHttpUrl, BaseSettings, validator
 from typing import List, Optional, Union
 
 
 # Project Directories
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
+dotenv_path = ROOT / '.env.local'
+load_dotenv(dotenv_path)
 
 class DBSettings(BaseSettings):
-    SQLALCHEMY_DATABASE_URI: str = "sqlite:///example.db"
+    SQLALCHEMY_DATABASE_URI: str = os.environ.get('DATABASE_URL')
 
 
 class Settings(BaseSettings):
     # BACKEND_CORS_ORIGINS is a JSON-formatted list of origins
     # e.g: '["http://localhost", "http://localhost:4200", "http://localhost:3000"]'
-    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = [
-        "http://localhost:3000",
-        "http://localhost:8001"
-    ]
+    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = os.environ.get('BACKEND_CORS_ORIGINS', [])
 
     # Origins that match this regex OR are in the above list are allowed
     BACKEND_CORS_ORIGIN_REGEX: Optional[str] = r'https://.*\.herokuapp.com'

@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+
+    pg-db:
+        image: postgres:14
+        container_name: pg-db
+        ports:
+          - "5432:5432"
+        environment:
+          - POSTGRES_USER=db_user
+          - POSTGRES_PASSWORD=password
+          - POSTGRES_DB=text_and_summary_dev
+
+        volumes:
+          - ../db-data/postgresql:/var/lib/postgresql/data

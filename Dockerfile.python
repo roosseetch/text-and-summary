@@ -1,0 +1,39 @@
+FROM python:3.10
+
+WORKDIR /app/
+
+# https://docs.python.org/3/using/cmdline.html#envvar-PYTHONDONTWRITEBYTECODE
+# Prevents Python from writing .pyc files to disk
+ENV PYTHONDONTWRITEBYTECODE 1
+
+# ensures that the python output is sent straight to terminal (e.g. your container log)
+# without being first buffered and that you can see the output of your application (e.g. django logs)
+# in real time. Equivalent to python -u: https://docs.python.org/3/using/cmdline.html#cmdoption-u
+ENV PYTHONUNBUFFERED 1
+
+# Install Poetry
+RUN curl -sSL https://install.python-poetry.org | POETRY_HOME=/opt/poetry python3.10 && \
+    cd /usr/local/bin && \
+    ln -s /opt/poetry/bin/poetry && \
+    poetry config virtualenvs.create false
+
+# Copy poetry.lock* in case it doesn't exist in the repo
+COPY ./project-text-and-summary/pyproject.toml ./project-text-and-summary/poetry.lock* /app/
+
+# Allow installing dev dependencies to run tests
+ARG INSTALL_DEV=false
+
+RUN bash -c "if [ $INSTALL_DEV == 'true' ] ; then poetry install --no-root ; else poetry install --no-root --only main ; fi"
+
+# To avoid the error - LookupError: NLTK tokenizers are missing or the language is not supported.
+# Download them by following command: python -c "import nltk; nltk.download('punkt')"
+RUN poetry run python3.10 -c "import nltk; nltk.download('punkt')"
+
+COPY ./project-text-and-summary/run.sh /app/
+RUN chmod +x run.sh
+
+ENV PYTHONPATH=/app
+
+# Run the run script, it will check for an /app/prestart.sh script (e.g. for migrations)
+# And then will start Uvicorn
+CMD ["./run.sh"]
