@@ -11,12 +11,12 @@ def test_cors_middlewares_valid_origin(client):
     headers = {
         'Access-Control-Request-Method': 'GET',
         'Access-Control-Request-Headers': 'origin',
-        'Origin': 'http://localhost:3000'
+        'Origin': 'http://localhost:8001'
     }
     response = client.options('/', headers=headers)
     assert response.status_code == 200
     assert response.text == 'OK'
-    assert response.headers['access-control-allow-origin'] == 'http://localhost:3000'
+    assert response.headers['access-control-allow-origin'] == 'http://localhost:8001'
 
 
 def test_cors_middlewares_not_valid_origin(client):
@@ -79,6 +79,58 @@ def test_list_documents(client):
     assert response.status_code == 200
     assert len(res['results']) == 3
     assert list(res['results'][0].keys()) == ['id']
+
+
+def test_list_documents_with_skip(client):
+    """
+    test listing of documents
+    """
+    DocumentFactory.create_batch(3)
+ 
+    params = {'skip': 2}
+    response = client.get('/', params=params)
+    res = response.json()
+    assert response.status_code == 200
+    assert len(res['results']) == 1
+ 
+    params = {'skip': -1}
+    response = client.get('/', params=params)
+    assert response.status_code == 422
+ 
+    '''
+    Test that in SQL `OFFSET %(param_2)` less then 9223372036854775807 BIGINT
+    to avoid the error `sqlalchemy.exc.DataError: (psycopg2.errors.NumericValueOutOfRange)
+    bigint out of range`
+    '''
+    params = {'skip': 99999999999999999999999999999999999999999999999999}
+    response = client.get('/', params=params)
+    assert response.status_code == 422
+
+
+def test_list_documents_with_limit(client):
+    """
+    test listing of documents with `limit` query parameter
+    """
+    DocumentFactory.create_batch(3)
+ 
+    params = {'limit': 1}
+    response = client.get('/', params=params)
+    res = response.json()
+    assert response.status_code == 200
+    assert len(res['results']) == 1
+ 
+    params = {'limit': -1}
+    response = client.get('/', params=params)
+    assert response.status_code == 422
+ 
+    '''
+    Test that in SQL `OFFSET %(param_2)` less then 9223372036854775807 BIGINT
+    to avoid the error `sqlalchemy.exc.DataError: (psycopg2.errors.NumericValueOutOfRange)
+    bigint out of range`
+    '''
+    params = {'limit': 99999999999999999999999999999999999999999999999999}
+    response = client.get('/', params=params)
+    assert response.status_code == 422
 
 
 def test_create_document(client):

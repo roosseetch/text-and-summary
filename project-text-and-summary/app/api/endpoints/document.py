@@ -1,6 +1,6 @@
 from typing import Optional, Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app import crud
@@ -44,8 +44,8 @@ def retrieve_document(
 @api_router.get("/", status_code=200, response_model=DocumentsListResponse)
 def list_documents(
     *,
-    skip: Optional[int] = 0,
-    limit: Optional[int] = 10,
+    skip: int | None = Query(0, ge=0, lt=9223372036854775807),
+    limit: int | None = Query(10, ge=1, lt=9223372036854775807),
     db: Session = Depends(deps.get_db),
 ) -> dict:
     """
