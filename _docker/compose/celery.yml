@@ -1,11 +1,12 @@
 version: "3"
 services:
-  web:
+  celery:
     build:
       context: ../../
       dockerfile: Dockerfile.python
-    container_name: web
+    container_name: celery
     environment:
+      - START_CELERY_WORKER=1
       - DATABASE_URL=postgresql://db_user:password@pg-db:5432/text_and_summary_dev
       - CELERY_BROCKER_REDIS_URL=redis://redis:6379/0
       - CELERY_BACKEND_REDIS_URL=redis://redis:6379/1
@@ -14,14 +15,8 @@ services:
       - pg-db
       - redis
     depends_on:
-      - pg-db
       - redis
-    # ports:
-    #   - "8001:8001"
+      - pg-db
     volumes:
       - ../../project-text-and-summary/app:/app/app
-      - ../../project-text-and-summary/start_db_session.py:/app/start_db_session.py
       - ../../project-text-and-summary/run.sh:/app/run.sh
-      - ../../project-text-and-summary/prestart.sh:/app/prestart.sh
-      - ../../project-text-and-summary/alembic:/app/alembic
-      - ../../project-text-and-summary/alembic.ini:/app/alembic.ini

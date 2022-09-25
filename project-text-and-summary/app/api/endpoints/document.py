@@ -1,15 +1,15 @@
-from typing import Optional, Any
+from typing import Any
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, BackgroundTasks
 from sqlalchemy.orm import Session
 
 from app import crud
 from app.api import deps
+from app.tasks import document_tasks
 from app.schemas.document import (
     DocumentsListResponse, DocumentResponse, DocumentFullResponse,  DocumentCreate,
     DocumentSummaryResponse)
 from app.utils.query_utils import get_db_obj_or_404
-from app.utils.summarizer import text_summarizer_lsa
 
 
 api_router = APIRouter()
@@ -56,26 +56,29 @@ def list_documents(
 
 
 @api_router.post("/", status_code=201, response_model=DocumentResponse)
-def create_document(
+async def create_document(
     *,
     document_in: DocumentCreate = Depends(DocumentCreate.as_form),
-    db: Session = Depends(deps.get_db)
+    db: Session = Depends(deps.get_db),
+    background_tasks: BackgroundTasks
 ) -> dict:
     """
     Create a new document in the database.
     """
-    summary = text_summarizer_lsa(document_in.text)
-    document = crud.document.create(db=db, obj_in={'text': document_in.text, 'summary': summary })
+    document = crud.document.create(db=db, obj_in={'text': document_in.text})
+
+    background_tasks.add_task(document_tasks.generate_summary_for_text.delay, document.id)
 
     return document
 
 
 @api_router.put("/{document_id}", status_code=200, response_model=DocumentResponse)
-def update_document(
+async def update_document(
     *,
     document_id: int,
     document_in: DocumentCreate = Depends(DocumentCreate.as_form),
-    db: Session = Depends(deps.get_db)
+    db: Session = Depends(deps.get_db),
+    background_tasks: BackgroundTasks
 ) -> dict:
     """
     Update a document in the database.
@@ -83,5 +86,7 @@ def update_document(
     error_msg = f"Document with ID {document_id} can't be updated, not found."
     db_obj = get_db_obj_or_404(obj_id=document_id, db=db, error_msg=error_msg)
     document = crud.document.update(db=db, db_obj=db_obj, obj_in=document_in)
+
+    background_tasks.add_task(document_tasks.generate_summary_for_text.delay, document.id)
 
     return document

@@ -1,5 +1,7 @@
 import factory
 
+from unittest.mock import patch, Mock
+
 from app.models.document import Document
 from app.tests.factories import DocumentFactory
 
@@ -133,6 +135,7 @@ def test_list_documents_with_limit(client):
     assert response.status_code == 422
 
 
+@patch('app.tasks.document_tasks.generate_summary_for_text', Mock())
 def test_create_document(client):
     """
     test creation of documents
@@ -147,6 +150,7 @@ def test_create_document(client):
     assert res['id'] == 1
 
 
+@patch('app.tasks.document_tasks.generate_summary_for_text', Mock())
 def test_update_document(client, session):
     """
     test updating of documents

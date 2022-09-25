@@ -18,11 +18,13 @@ Session = sessionmaker()
 
 Base.metadata.create_all(bind=engine)
 
+
 @pytest.fixture(scope='module')
 def connection():
     connection = engine.connect()
     yield connection
     connection.close()
+
 
 @pytest.fixture(scope='function')
 def session(connection):
