@@ -1,5 +1,5 @@
+from celery import Celery
 from fastapi import FastAPI
-from fastapi.middleware import Middleware
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.endpoints.document import api_router
@@ -23,6 +23,20 @@ if settings.BACKEND_CORS_ORIGINS:
 app.add_middleware(ProcessTimeMiddleware)
 
 app.include_router(api_router)
+
+
+###### Celery #######
+celery = Celery(
+    __name__,
+    broker=settings.celery.brocker,
+    backend=settings.celery.backend
+)
+
+
+celery.conf.imports = [
+    'app.tasks.document_tasks'
+]
+#####################
 
 
 if __name__ == "__main__":

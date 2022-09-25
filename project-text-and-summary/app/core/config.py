@@ -15,6 +15,20 @@ load_dotenv(dotenv_path)
 class DBSettings(BaseSettings):
     SQLALCHEMY_DATABASE_URI: str = os.environ.get('DATABASE_URL')
 
+class SummarizerSettings(BaseSettings):
+    LANGUAGE: str = os.environ.get('LSA_SUMMARIZER_LANGUAGE')
+    SENTENCES_COUNT: str = os.environ.get('LSA_SUMMARIZER_SENTENCES_COUNT')
+
+
+class CelerySettings(BaseSettings):
+    brocker: str = os.environ.get('CELERY_BROCKER_REDIS_URL')
+    backend: str = os.environ.get('CELERY_BACKEND_REDIS_URL')
+
+
+class RedisSettings(BaseSettings):
+    url: str = os.environ.get('REDIS_CACHE_URL')
+    summary_fail_key: str = os.environ.get('REDIS_SUMMARY_FAIL_KEY')
+
 
 class Settings(BaseSettings):
     # BACKEND_CORS_ORIGINS is a JSON-formatted list of origins
@@ -33,6 +47,9 @@ class Settings(BaseSettings):
         raise ValueError(v)
 
     db: DBSettings = DBSettings()
+    lsa: SummarizerSettings = SummarizerSettings()
+    celery: CelerySettings = CelerySettings()
+    redis: RedisSettings = RedisSettings()
 
     class Config:
         case_sensitive = True
