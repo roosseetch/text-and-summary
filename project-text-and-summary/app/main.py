@@ -3,10 +3,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.endpoints.document import api_router
-from app.core.config import settings
+from app.core.config import settings, setup_app_logging
 from app.core.middlewares import ProcessTimeMiddleware
 
 
+setup_app_logging(config=settings)
 app = FastAPI(title="Document API")
 
 # Set all CORS enabled origins

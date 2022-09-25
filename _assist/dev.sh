@@ -11,11 +11,6 @@ case $1 in
             -f _docker/compose/redis.yml \
             $(echo "$2")
         ;;
-    redis)
-        docker-compose \
-            -f _docker/compose/redis.yml \
-            $(echo "$2")
-        ;;
     app)
         docker-compose \
             -f _docker/compose/pg-db.yml \
@@ -27,7 +22,7 @@ case $1 in
         ;;
     *)
         echo "**********************************************************************************"
-        echo -e "\e[31m*^*^*  error command must be sh _assist/dev.sh db-redis|redis|app up|pull|build  *^*^*\e[0m"
+        echo -e "\e[31m*^*^*  error command must be sh _assist/dev.sh db-redis|app up|pull|build  *^*^*\e[0m"
         echo "**********************************************************************************"
         ;;
 

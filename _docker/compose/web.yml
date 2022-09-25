@@ -25,3 +25,4 @@ services:
       - ../../project-text-and-summary/prestart.sh:/app/prestart.sh
       - ../../project-text-and-summary/alembic:/app/alembic
       - ../../project-text-and-summary/alembic.ini:/app/alembic.ini
+      - ../../project-text-and-summary/file_1.log:/app/file_1.log
