@@ -1,9 +1,14 @@
+import logging
 import os
 import pathlib
+import sys
 
 from dotenv import load_dotenv
+from loguru import logger
 from pydantic import AnyHttpUrl, BaseSettings, validator
 from typing import List, Optional, Union
+
+from app.core.logging import InterceptHandler
 
 
 # Project Directories
@@ -30,6 +35,10 @@ class RedisSettings(BaseSettings):
     summary_fail_key: str = os.environ.get('REDIS_SUMMARY_FAIL_KEY')
 
 
+class LoggingSettings(BaseSettings):
+    LOGGING_LEVEL: int = logging.INFO  # logging levels are ints
+
+
 class Settings(BaseSettings):
     # BACKEND_CORS_ORIGINS is a JSON-formatted list of origins
     # e.g: '["http://localhost", "http://localhost:4200", "http://localhost:3000"]'
@@ -50,6 +59,7 @@ class Settings(BaseSettings):
     lsa: SummarizerSettings = SummarizerSettings()
     celery: CelerySettings = CelerySettings()
     redis: RedisSettings = RedisSettings()
+    logging: LoggingSettings = LoggingSettings()
 
     class Config:
         case_sensitive = True
@@ -58,3 +68,17 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+
+def setup_app_logging(config: Settings) -> None:
+    """Prepare custom logging for our application."""
+    LOGGERS = ('uvicorn.asgi', 'uvicorn.access', 'uvicorn.error')
+    logging.getLogger().handlers = [InterceptHandler()]
+    for logger_name in LOGGERS:
+        logging_logger = logging.getLogger(logger_name)
+        logging_logger.handlers = [InterceptHandler(level=config.logging.LOGGING_LEVEL)]
+
+    logger.configure(
+        handlers=[{'sink': sys.stderr, 'level': config.logging.LOGGING_LEVEL}]
+    )
+    logger.add('file_1.log', rotation='10 MB')

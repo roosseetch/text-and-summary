@@ -1,3 +1,4 @@
+from loguru import logger
 from sumy.parsers.plaintext import PlaintextParser
 from sumy.nlp.tokenizers import Tokenizer
 from sumy.summarizers.lsa import LsaSummarizer as Summarizer
@@ -29,8 +30,7 @@ def text_summarizer_lsa(document_id: int) -> str:
 
         summary = '\n'.join([str(s) for s in summarizer(parser.document, settings.lsa.SENTENCES_COUNT)])
         crud.document.update(db=db, db_obj=document, obj_in={'summary': summary})
-    except Exception as e:
+    except Exception:
         redis_cli = init_redis_client()
-        # log error
         redis_cli.lpush(settings.redis.summary_fail_key, document.id)
-        print(e)
+        logger.exception('Text summarization failed')

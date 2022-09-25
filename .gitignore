@@ -9,3 +9,6 @@ test.db
 
 # PostgreSQL DB data
 _docker/db-data/
+
+# logs
+file_1.log

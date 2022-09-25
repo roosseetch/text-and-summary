@@ -20,3 +20,4 @@ services:
     volumes:
       - ../../project-text-and-summary/app:/app/app
       - ../../project-text-and-summary/run.sh:/app/run.sh
+      - ../../project-text-and-summary/file_1.log:/app/file_1.log

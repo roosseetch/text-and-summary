@@ -11,3 +11,6 @@ the bash script if preferred `poetry run ./prestart.sh`)
 8. Open http://localhost:8001/
 9. Open API documentation http://localhost:8001/docs or http://localhost:8001/redoc
 10. Run the tests `poetry run pytest`
+
+## Logs
+Logs for 'uvicorn.asgi', 'uvicorn.access', 'uvicorn.error', 'celery error' logged to file_1.log .
