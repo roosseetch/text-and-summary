@@ -19,3 +19,6 @@ Source code is attached with volumes.
 1. Run the project in containers `cd <root derictory>` and `sh _assist/dev.sh app up`.
 2. Open https://documents.localhost/docs. Because SSL certificates self-issued you will see the warning modal in the Browser \
 so you will need to click “ADVANCED” and then the link provided to proceed to your host anyways.
+
+## Architecure Diagram
+![Screenshot](static/architecture-diagram.drawio.png)
