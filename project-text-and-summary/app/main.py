@@ -1,6 +1,10 @@
+import json
+
 from celery import Celery
 from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError, ValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.responses import JSONResponse
 
 from app.api.endpoints.document import api_router
 from app.core.config import settings, setup_app_logging
@@ -24,6 +28,17 @@ if settings.BACKEND_CORS_ORIGINS:
 app.add_middleware(ProcessTimeMiddleware)
 
 app.include_router(api_router)
+
+@app.exception_handler(RequestValidationError)
+@app.exception_handler(ValidationError)
+async def validation_exception_handler(request, exc):
+    print(f"OMG! The client sent invalid data!: {exc}")
+    exc_json = json.loads(exc.json())
+    response = {"message": [], "data": None}
+    for error in exc_json:
+        response['message'].append(error['loc'][-1]+f": {error['msg']}")
+
+    return JSONResponse(response, status_code=422)
 
 
 ###### Celery #######

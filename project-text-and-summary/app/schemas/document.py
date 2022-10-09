@@ -1,18 +1,24 @@
 from typing import Sequence
 
-from pydantic import BaseModel
+from pydantic import BaseModel, validator, Field
 
-from ..utils.decorators import as_form
+from app.utils.decorators import as_form
+from app.utils.string_utils import strip_special_characters
 
 @as_form
 class DocumentCreate(BaseModel):
-    text: str
+    text: str = Field(..., min_length=1)
+
+    @validator('text')
+    def validate_text(cls, text):
+        text = strip_special_characters(text)
+        if not text:
+            raise ValueError('Text should contain not special characters')
+        return text
 
 
-@as_form
-class DocumentUpdate(BaseModel):
-    text: str
-
+class DocumentUpdate(DocumentCreate):
+    ...
 
 # Properties shared by models stored in DB
 class DocumentInDBBase(BaseModel):
