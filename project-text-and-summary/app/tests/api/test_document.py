@@ -4,6 +4,7 @@ from unittest.mock import patch, Mock
 
 from app.models.document import Document
 from app.tests.factories import DocumentFactory
+from app.utils.string_utils import strip_special_characters
 
 
 def test_cors_middlewares_valid_origin(client):
@@ -136,18 +137,22 @@ def test_list_documents_with_limit(client):
 
 
 @patch('app.tasks.document_tasks.generate_summary_for_text', Mock())
-def test_create_document(client):
+def test_create_document(client, session):
     """
     test creation of documents
     """
+    text = factory.faker.faker.Faker().text().strip('.')
     data = {
-        'text': factory.Faker('text')
+        'text': ''.join([text, '.&(&((%&$%^$^'])
     }
     response = client.post('/', data=data)
     res = response.json()
     assert response.status_code == 201
     assert list(res.keys()) == ['id']
     assert res['id'] == 1
+
+    doc = list(session())[0].query(Document).one()
+    assert text == doc.text
 
 
 @patch('app.tasks.document_tasks.generate_summary_for_text', Mock())
@@ -157,9 +162,9 @@ def test_update_document(client, session):
     """
     doc = DocumentFactory.create()
     initial_text = doc.text
-    faker = factory.faker.faker.Faker()
+    text = factory.faker.faker.Faker().text().strip('.')
     data = {
-        'text': faker.text()
+        'text': ''.join([text, '.&(&((%&$%^$^'])
     }
     response = client.put(f'/{doc.id}', data=data)
     res = response.json()
@@ -170,6 +175,34 @@ def test_update_document(client, session):
     updated_doc = list(session())[0].query(Document).one()
 
     assert initial_text != data['text']
-    assert updated_doc.text == data['text']
+    assert updated_doc.text == strip_special_characters(data['text'])
     # because of db.refresh(db_obj) in CRUD creat method we have valid next assertion
     assert updated_doc.text == doc.text
+
+
+@patch('app.tasks.document_tasks.generate_summary_for_text', Mock())
+def test_create_document_with_empty_text(client):
+    """
+    test creation of documents
+    """
+    data = {
+        'text': ''
+    }
+    response = client.post('/', data=data)
+    res = response.json()
+    assert response.status_code == 422
+    assert res['message'][0] == 'text: none is not an allowed value'
+
+
+@patch('app.tasks.document_tasks.generate_summary_for_text', Mock())
+def test_create_document_with_text_just_special_characters(client):
+    """
+    test creation of documents
+    """
+    data = {
+        'text': '&*^@(#&@(*#@!##@_)#@#&@#)(@#@#$%^&_)^%@!'
+    }
+    response = client.post('/', data=data)
+    res = response.json()
+    assert response.status_code == 422
+    assert res['message'][0] == 'text: Text should contain not special characters'

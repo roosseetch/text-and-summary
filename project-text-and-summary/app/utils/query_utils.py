@@ -16,6 +16,6 @@ def get_db_obj_or_404(
         # the exception is raised, not returned - you will get a validation
         # error otherwise.
         error_msg = error_msg or f"Object with ID {obj_id} not found."
-        raise HTTPException( status_code=404, detail=error_msg)
+        raise HTTPException(status_code=404, detail=error_msg)
     
     return db_obj
